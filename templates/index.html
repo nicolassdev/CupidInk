@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+  <head>
+    <title>CupidLink 💘</title>
+
+    <style>
+      body {
+        font-family: Segoe UI;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        margin: 0;
+      }
+
+      header {
+        text-align: center;
+        padding: 50px;
+        color: white;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+
+      .letter {
+        background: white;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      button {
+        background: #ff4d6d;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 30px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #e63956;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 400px;
+        text-align: center;
+      }
+
+      .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #ff4d6d;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>💘 CupidLink</h1>
+      <p>Monthly Love Letters for Your Special Someone</p>
+
+      <button onclick="generateLetter()">Generate Love Letter</button>
+    </header>
+
+    <div class="container">
+      {% for letter in letters %}
+
+      <div class="letter">
+        <h3>{{letter.date}}</h3>
+
+        <p style="white-space: pre-line">{{letter.content}}</p>
+      </div>
+
+      {% endfor %}
+    </div>
+
+    <!-- Modal -->
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div id="loader" class="loader"></div>
+
+        <h3 id="message">Preparing your love letter...</h3>
+
+        <br />
+
+        <button onclick="closeModal()">Close</button>
+      </div>
+    </div>
+
+    <script>
+      function generateLetter() {
+        let modal = document.getElementById("modal");
+        let loader = document.getElementById("loader");
+        let message = document.getElementById("message");
+
+        modal.style.display = "flex";
+        loader.style.display = "block";
+        message.innerText = "Cupid is thinking about your love story... 💘";
+
+        fetch("/generate")
+          .then((res) => res.json())
+
+          .then((data) => {
+            loader.style.display = "none";
+
+            if (data.status == "not_allowed") {
+              message.innerText =
+                "❤️ Why can't Cupid write today?\n\n" +
+                "Every love letter from CupidLink is special and only written once a month.\n" +
+                "It appears on the 11th to make that day magical for your relationship.\n\n" +
+                "Come back on the 11th and a beautiful letter will be waiting.";
+            } else {
+              message.innerText = "💌 Your love letter has been generated!";
+
+              setTimeout(() => {
+                location.reload();
+              }, 2000);
+            }
+          });
+      }
+
+      function closeModal() {
+        document.getElementById("modal").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
