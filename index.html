@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CupidLink 💘</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        margin: 0;
+      }
+      header {
+        text-align: center;
+        padding: 50px;
+        color: white;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+      .letter {
+        background: white;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+      .letter .time {
+        font-size: 12px;
+        color: #999;
+        position: absolute;
+        top: 10px;
+        left: 15px;
+      }
+      .date {
+        font-weight: bold;
+        color: #ff4d6d;
+        margin-bottom: 10px;
+      }
+      button {
+        background: #ff4d6d;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 30px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e63956;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 450px;
+        text-align: center;
+      }
+      .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #ff4d6d;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>💘 CupidLink</h1>
+      <p>Monthly Love Letters for My Lovieee</p>
+      <button onclick="generateLetter()">Generate Love Letter</button>
+    </header>
+
+    <div class="container" id="lettersContainer"></div>
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div id="loader" class="loader"></div>
+        <h3 id="modalMessage">
+          Cupid is preparing something special for you... 💘
+        </h3>
+        <br />
+        <button onclick="closeModal()">Close</button>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "cupidlink_letters";
+
+      // Letter parts (can expand as needed)
+      // Letter parts for mega love letters
+      const openings = [
+        "My dearest love,",
+        "To the love of my life,",
+        "My sweet darling,",
+        "My beautiful soulmate,",
+        "To the one who makes my heart skip a beat,",
+        "My beloved, my heart belongs to you always,",
+        "To the light of my world,",
+        "My forever and always,",
+        "To the treasure of my heart,",
+        "To my endless source of joy,",
+        "My one and only true love,",
+        "To the reason I smile every day,",
+        "My angel sent from heaven,",
+        "To my sunshine on cloudy days,",
+        "My heartbeat, my everything,",
+        "To my eternal companion,",
+        "My confidant, my love, my muse,",
+        "To my sweetest obsession,",
+        "My heart’s desire, my soul’s delight,",
+        "To the keeper of my heart,",
+      ];
+
+      const feelings = [
+        "Every day I wake up grateful that you are in my life.",
+        "Your love makes my world brighter than the morning sun.",
+        "You are the most beautiful part of my life.",
+        "Thinking about you fills my heart with peace and happiness.",
+        "When I see you smile, the entire world feels right.",
+        "My love for you grows deeper with each passing moment.",
+        "I feel complete knowing you are by my side.",
+        "You are the calm to my chaos, the warmth in my coldest days.",
+        "No one has ever made me feel as cherished as you do.",
+        "You are the melody that makes my heart sing every day.",
+        "Your laughter echoes in my soul long after the sound fades.",
+        "Each thought of you makes my heart race with joy.",
+        "I find peace in knowing your love is always with me.",
+        "Even in the silence, I feel your presence surrounding me.",
+        "You are the inspiration behind all the dreams I dare to dream.",
+        "My soul feels alive when it resonates with yours.",
+        "Your love is the gentle wind that guides me home.",
+        "I am endlessly fascinated by every facet of your being.",
+        "Your voice is a symphony I never want to stop hearing.",
+        "I treasure every glance, every touch, every word we share.",
+      ];
+
+      const memories = [
+        "Every memory with you is a treasure I will always keep.",
+        "Your smile is the light that guides my darkest days.",
+        "The laughter we share is my favorite sound.",
+        "I remember the first time we met, and how my heart knew you were mine.",
+        "All our adventures, small and big, are etched in my heart forever.",
+        "The way you hold my hand makes everything feel safe and right.",
+        "I cherish every silly moment, every quiet evening, every shared secret with you.",
+        "Even the smallest gestures from you are priceless to me.",
+        "All the times we laughed until we cried are moments I live for.",
+        "I love remembering our love story unfolding day by day.",
+        "I can replay every hug, kiss, and touch in my mind endlessly.",
+        "Every inside joke between us warms my soul like a fire.",
+        "I think back to the first time I whispered 'I love you' and your smile.",
+        "All the little adventures we’ve taken together feel monumental to me.",
+        "Your hand in mine is a memory I will never forget.",
+        "The quiet mornings with you are my favorite symphonies.",
+        "I will remember forever how you made me feel like home.",
+        "Every late-night conversation lingers in my heart like poetry.",
+        "Even mistakes we made together are precious memories now.",
+        "You make every ordinary day feel like a magical chapter in our story.",
+      ];
+
+      const future = [
+        "I dream of a future where we grow together every day.",
+        "No matter what life brings, I will always choose you.",
+        "Our love story is my favorite story ever written.",
+        "I imagine us growing old together, still laughing, still holding hands.",
+        "I look forward to all the sunsets and sunrises we will share.",
+        "Together we can conquer anything life throws our way.",
+        "I can’t wait to create countless memories with you in the years to come.",
+        "Every dream I have seems brighter knowing you are part of it.",
+        "I see a future filled with love, warmth, and endless joy with you.",
+        "With you, every tomorrow is something I eagerly await.",
+        "I see a home full of laughter, love, and shared dreams with you.",
+        "I imagine quiet walks hand-in-hand, and adventures we haven’t even dreamed of yet.",
+        "All the tomorrows of my life feel beautiful knowing you’re in them.",
+        "Our love will continue to grow like an endless, blooming garden.",
+        "I see us overcoming all challenges together, stronger than ever.",
+        "I long for the days we’ll sit and reminisce about today, laughing together.",
+        "Every plan I make for the future is brighter with you in it.",
+        "I can’t wait to celebrate each milestone and joy with you.",
+        "Our story is a masterpiece I want to read every day.",
+        "Every day with you is a page in a love letter I never want to end.",
+      ];
+
+      const closings = [
+        "Forever yours.",
+        "With all my love.",
+        "Always thinking of you.",
+        "With every beat of my heart.",
+        "Endlessly devoted to you.",
+        "With all that I am and all I have.",
+        "Yours in love today, tomorrow, and always.",
+        "With my heart in your hands.",
+        "Always and forever yours.",
+        "With deepest love and eternal devotion.",
+        "I remain yours, now and for eternity.",
+        "With all the passion my heart can hold.",
+        "Every fiber of my being belongs to you.",
+        "Lovingly and endlessly yours.",
+        "With a heart full of affection and adoration.",
+        "All my days, all my nights, all my love, yours.",
+        "With unwavering devotion and love beyond measure.",
+        "Forever enchanted by your presence.",
+        "With all the warmth, love, and tenderness I can give.",
+        "Eternally and unconditionally yours.",
+      ];
+
+      function generateLetterContent() {
+        function pick(arr) {
+          return arr[Math.floor(Math.random() * arr.length)];
+        }
+        return `
+${pick(openings)}
+
+${pick(feelings)}
+
+${pick(memories)}
+
+${pick(future)}
+
+${pick(closings)}
+`;
+      }
+
+      function loadLetters() {
+        const container = document.getElementById("lettersContainer");
+        container.innerHTML = "";
+        const letters = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        letters.reverse().forEach((letter) => {
+          const div = document.createElement("div");
+          div.className = "letter";
+          div.innerHTML = `
+            <div class="time">${letter.time}</div>
+            <div class="date">Letter Date: ${letter.date}</div>
+            <p style="white-space: pre-line;">${letter.content}</p>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      const loaderMessages = [
+        "Cupid is sharpening his arrows... 💘",
+        "Thinking about your most beautiful memories together... 🌹",
+        "Mixing all the sweetest words of love... 💖",
+        "Polishing the letter with extra heart and magic... ✨",
+        "Counting every beat of my heart that belongs to you... ❤️",
+        "Almost ready... let Cupid sprinkle some stardust on it... 🌟",
+      ];
+
+      function generateLetter() {
+        const modal = document.getElementById("modal");
+        const loader = document.getElementById("loader");
+        const message = document.getElementById("modalMessage");
+
+        modal.style.display = "flex";
+        loader.style.display = "block";
+        message.innerText = loaderMessages[0];
+
+        let index = 0;
+        const interval = setInterval(() => {
+          index = (index + 1) % loaderMessages.length;
+          message.innerText = loaderMessages[index];
+        }, 1500);
+
+        setTimeout(() => {
+          clearInterval(interval);
+          const today = new Date();
+          if (today.getDate() !== 11) {
+            localStorage.removeItem(STORAGE_KEY);
+            loader.style.display = "none";
+            message.innerText = `❤️ Cupid only writes letters on the 11th.\nPrevious letters have been cleared. Come back on the 11th for your love letter!`;
+            loadLetters();
+            return;
+          }
+
+          const letterContent = generateLetterContent();
+          let letters = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+          letters.push({
+            date: today.toLocaleDateString(),
+            time: today.toLocaleTimeString(),
+            content: letterContent,
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(letters));
+
+          loader.style.display = "none";
+          message.innerText = "💌 Your love letter has been created!";
+          loadLetters();
+        }, loaderMessages.length * 1500);
+      }
+
+      function closeModal() {
+        document.getElementById("modal").style.display = "none";
+      }
+
+      window.onload = () => {
+        const today = new Date();
+        if (today.getDate() !== 11) localStorage.removeItem(STORAGE_KEY);
+        loadLetters();
+      };
+    </script>
+  </body>
+</html>
